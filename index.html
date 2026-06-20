@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Helping Hands - Donate</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .header {
+      text-align: center;
+      padding: 20px;
+      color: white;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 2.5em;
+    }
+    .header p {
+      margin: 10px 0 0 0;
+      font-size: 1.2em;
+    }
+    .container {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      padding: 40px;
+      max-width: 600px;
+      width: 90%;
+      margin: 20px auto;
+      text-align: center;
+    }
+    .mission {
+      margin-bottom: 30px;
+      color: #4a5568;
+    }
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 30px;
+      background: #f7fafc;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat .number {
+      font-size: 2em;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .stat .label {
+      font-size: 0.9em;
+      color: #718096;
+    }
+    .amount-options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .amount-btn {
+      background: #edf2f7;
+      border: 2px solid #e2e8f0;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1em;
+      transition: all 0.3s ease;
+    }
+    .amount-btn:hover, .amount-btn.selected {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    .custom-amount {
+      margin: 20px 0;
+    }
+    .custom-amount input {
+      width: 100%;
+      padding: 10px;
+      font-size: 1.1em;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .custom-amount input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    #payBtn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      width: 100%;
+      margin-top: 20px;
+    }
+    #payBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    #payBtn:active {
+      transform: translateY(0);
+    }
+    .secure {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #718096;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: white;
+      font-size: 0.9em;
+    }
+    .footer a {
+      color: white;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+    .result .qr-container img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .result .qr-id, .result .upi-link {
+      background: #f7fafc;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+      font-family: monospace;
+      font-size: 0.9em;
+      word-break: break-all;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      .header h1 {
+        font-size: 2em;
+      }
+      .stats {
+        flex-direction: column;
+        gap: 15px;
+      }
+      .amount-options {
+        flex-direction: column;
+        align-items: center;
+      }
+      .amount-btn {
+        width: 80%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Helping Hands Foundation</h1>
+    <p>Empowering communities through education and healthcare</p>
+  </div>
+  
+  <div class="container" id="donationForm">
+    <div class="mission">
+      <h2>Make a Difference Today</h2>
+      <p>Your donation helps provide education to underprivileged children, medical aid to families in need, and sustainable development projects in rural areas. Every contribution, no matter the size, creates lasting impact.</p>
+    </div>
+    
+    <div class="stats">
+      <div class="stat">
+        <div class="number">₹2.5L</div>
+        <div class="label">Raised This Year</div>
+      </div>
+      <div class="stat">
+        <div class="number">1,250</div>
+        <div class="label">Lives Impacted</div>
+      </div>
+      <div class="stat">
+        <div class="number">500+</div>
+        <div class="label">Happy Donors</div>
+      </div>
+    </div>
+    
+    <h3>Select Donation Amount</h3>
+    <div class="amount-options">
+      <button class="amount-btn" data-amount="50">₹50</button>
+      <button class="amount-btn" data-amount="100">₹100</button>
+      <button class="amount-btn" data-amount="250">₹250</button>
+      <button class="amount-btn" data-amount="500">₹500</button>
+      <button class="amount-btn" data-amount="1000">₹1000</button>
+    </div>
+    
+    <div class="custom-amount">
+      <label for="customAmount">Or enter custom amount:</label>
+      <input type="number" id="customAmount" placeholder="Enter amount in ₹" min="1">
+    </div>
+    
+    <button id="payBtn">Generate Payment QR</button>
+    
+    <div class="secure">
+      🔒 Secure UPI Payment | Your information is protected
+    </div>
+  </div>
+  
+  <div class="footer">
+    <p>&copy; 2024 Helping Hands Foundation | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a> | <a href="#">Contact Us</a></p>
+  </div>
+  
+  <script>
+    let selectedAmount = 100; // default
+    
+    document.querySelectorAll('.amount-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedAmount = parseInt(this.dataset.amount);
+        document.getElementById('customAmount').value = '';
+      });
+    });
+    
+    document.getElementById('customAmount').addEventListener('input', function() {
+      if (this.value) {
+        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+        selectedAmount = parseInt(this.value) || 0;
+      }
+    });
+    
+    document.getElementById("payBtn").addEventListener("click", function() {
+      if (selectedAmount < 1) {
+        alert('Please select or enter a valid donation amount.');
+        return;
+      }
+      
+      fetch("http://localhost:3000/api/payments/qr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: selectedAmount, description: "Donation to Helping Hands", customerId: "DONOR_" + Date.now() })
+      })
+      .then(r => r.json())
+      .then(data => {
+        document.body.innerHTML = `
+          <div class="header">
+            <h1>Thank You for Your Donation!</h1>
+            <p>Your generosity makes a real difference</p>
+          </div>
+          <div class="container result">
+            <h2>Scan QR Code to Complete Payment</h2>
+            <div class="qr-container">
+              <img src="${data.data.qrCodeBase64}" alt="Payment QR Code" />
+            </div>
+            <div class="qr-id">Transaction ID: ${data.data.qrId}</div>
+            <div class="upi-link">UPI Link: ${data.data.upiDeepLink}</div>
+            <p style="margin-top: 20px; color: #4a5568;">Amount: ₹${selectedAmount}</p>
+            <button onclick="location.reload()" style="margin-top: 20px; background: #48bb78; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1.1em;">Make Another Donation</button>
+          </div>
+          <div class="footer">
+            <p>&copy; 2024 Helping Hands Foundation | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a> | <a href="#">Contact Us</a></p>
+          </div>
+        `;
+      })
+      .catch(error => {
+        alert('Error generating QR code. Please try again.');
+        console.error(error);
+      });
+    });
+  </script>
+</body>
+</html>

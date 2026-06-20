@@ -1,0 +1,225 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  # ── Super-Linter: JavaScript, TypeScript, YAML, JSON, Markdown ─────────────
+  super-linter:
+    name: Super-Linter
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
+      checks: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Super-Linter
+        uses: super-linter/super-linter@v8.7.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BRANCH: main
+          LINTER_RULES_PATH: /
+          TYPESCRIPT_ESLINT_CONFIG_FILE: .eslintrc.json
+          VALIDATE_TYPESCRIPT_ES: true
+          VALIDATE_JSON: true
+          VALIDATE_YAML: true
+          VALIDATE_MARKDOWN: true
+
+  # ── PR Agent: Automated Code Review and Suggestions ────────────────────────
+  pr-agent:
+    name: PR Agent Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: PR Agent Action Step
+        uses: the-pr-agent/pr-agent@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── MegaLinter: Advanced Multi-Format Code Analysis ────────────────────────
+  megalinter:
+    name: MegaLinter
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run MegaLinter
+        id: ml
+        uses: oxsecurity/megalinter@v8
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_STATUS_CHECK_CONTEXT: "MegaLinter"
+          GITHUB_COMMENT_REPORTER: true
+          DEFAULT_BRANCH: main
+          TYPESCRIPT_ES_CONFIG_FILE: .eslintrc.json
+          VALIDATE_ALL_CODEBASE: false
+
+      - name: Upload MegaLinter Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: megalinter-reports
+          path: |
+            megalinter-reports/
+            mega-linter.sarif
+
+  # ── Code Build: TypeScript Compilation and Bundle ──────────────────────────
+  build:
+    name: Code Build
+    runs-on: ubuntu-latest
+    needs: [super-linter, megalinter]
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
+          retention-days: 5
+
+  # ── Code Test: Unit, Integration, and Coverage Tests ──────────────────────
+  test:
+    name: Code Test
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: npm test -- --reporter=verbose
+
+      - name: Generate Coverage Report
+        run: npm run test:coverage
+
+      - name: Upload Coverage Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: coverage/
+          retention-days: 30
+
+      - name: Comment Test Results on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const coverage = fs.existsSync('coverage/coverage-summary.json') 
+              ? JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'))
+              : null;
+            
+            let comment = '## ✅ Test Results\n\n';
+            if (coverage && coverage.total) {
+              comment += `### Coverage Summary\n`;
+              comment += `- **Lines**: ${coverage.total.lines.pct}%\n`;
+              comment += `- **Statements**: ${coverage.total.statements.pct}%\n`;
+              comment += `- **Functions**: ${coverage.total.functions.pct}%\n`;
+              comment += `- **Branches**: ${coverage.total.branches.pct}%\n\n`;
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment + '**Tests passed successfully!** ✨'
+            });
+
+  # ── Dependency Security Check ─────────────────────────────────────────────
+  security:
+    name: Security Checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+
+      - name: Upload Trivy Results to GitHub Security Tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"
+
+  # ── Status Check: Final Pass/Fail Gate ─────────────────────────────────────
+  status-check:
+    name: Pipeline Status
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [super-linter, pr-agent, megalinter, build, test, security]
+    steps:
+      - name: Check Pipeline Status
+        run: |
+          if [[ "${{ needs.super-linter.result }}" == "failure" ]] || \
+             [[ "${{ needs.megalinter.result }}" == "failure" ]] || \
+             [[ "${{ needs.build.result }}" == "failure" ]] || \
+             [[ "${{ needs.test.result }}" == "failure" ]]; then
+            echo "❌ Pipeline failed!"
+            exit 1
+          fi
+          echo "✅ Pipeline passed!"
+
+      - name: Notify Success
+        if: success()
+        run: echo "🎉 All checks passed successfully!"

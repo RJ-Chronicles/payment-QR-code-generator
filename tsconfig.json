@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    /* Output Configuration */
+    "target": "ES2020",                          /* Compile to ES2020 JavaScript standard */
+    "module": "commonjs",                        /* Use CommonJS module system */
+    "lib": ["ES2020"],                           /* Include ES2020 library type definitions */
+    "outDir": "./dist",                          /* Output compiled files to dist folder */
+    "rootDir": "./src",                          /* Root directory for source files */
+    
+    /* Strict Type-Checking Options */
+    "strict": true,                              /* Enable all strict type-checking options */
+    "noImplicitAny": true,                       /* Disallow variables with implicit 'any' type */
+    "strictNullChecks": true,                    /* Treat null and undefined as distinct types */
+    "strictFunctionTypes": true,                 /* Enforce stricter function type compatibility */
+    "strictBindCallApply": true,                 /* Strict type checking for bind, call, apply */
+    "strictPropertyInitialization": true,       /* Require class properties to be initialized */
+    "noImplicitThis": true,                      /* Error on 'this' with implicit 'any' type */
+    
+    /* Code Quality & Scanning */
+    "noUnusedLocals": true,                      /* Report unused local variables as errors */
+    "noUnusedParameters": true,                  /* Report unused function parameters as errors */
+    "noImplicitReturns": true,                   /* Error if not all code paths return a value */
+    "noFallthroughCasesInSwitch": true,          /* Error on unreachable break in switch cases */
+    
+    /* Module Resolution & Declaration */
+    "esModuleInterop": true,                     /* Enable compatibility with CommonJS modules */
+    "declaration": true,                         /* Generate .d.ts declaration files */
+    "declarationMap": true,                      /* Generate source maps for declaration files */
+    "sourceMap": true,                           /* Generate source map files for debugging */
+    "skipLibCheck": true,                        /* Skip type checking of library definition files */
+    "forceConsistentCasingInFileNames": true,    /* Disallow inconsistently cased file names */
+    "resolveJsonModule": true                    /* Allow importing JSON files as modules */
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
