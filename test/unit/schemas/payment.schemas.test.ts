@@ -10,7 +10,6 @@ import {
   QRPaymentRecordSchema,
   CreateQRResponseSchema,
 } from "../../../src/schemas/payment.schemas";
-import { ZodError } from "zod";
 
 describe("Payment Schemas - Unit Tests", () => {
   describe("CreateQRRequestSchema", () => {

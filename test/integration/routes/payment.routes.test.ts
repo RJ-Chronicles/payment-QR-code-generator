@@ -3,7 +3,7 @@
  * Tests API endpoints and controller-level logic
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import request from "supertest";
 import app from "../../../src/app";
 
@@ -112,9 +112,10 @@ describe("Payment Routes - Integration Tests", () => {
     });
 
     it("should reject empty QR ID parameter", async () => {
-      const response = await request(app)
+      // Route returns 404 for missing route
+      await request(app)
         .get("/api/payments/qr/")
-        .expect(404); // Route not found
+        .expect(404);
     });
   });
 

@@ -8,20 +8,29 @@ import { z } from "zod";
 import { validateBody, validateParams, validateQuery } from "../../../src/middleware/validation.middleware";
 import { Request, Response, NextFunction } from "express";
 
+interface MockResponse extends Partial<Response> {
+  statusCode?: number;
+  jsonData?: Record<string, unknown>;
+}
+
+interface MockRequest extends Partial<Request> {
+  validatedBody?: unknown;
+}
+
 describe("Validation Middleware - Unit Tests", () => {
-  const createMockRequest = (data: any): Partial<Request> => ({
+  const createMockRequest = (data: Record<string, unknown>): MockRequest => ({
     body: data,
     params: data,
     query: data,
   });
 
-  const createMockResponse = (): Partial<Response> => {
-    const res: any = {};
+  const createMockResponse = (): MockResponse => {
+    const res: MockResponse = {};
     res.status = function (code: number) {
       res.statusCode = code;
       return res;
     };
-    res.json = function (data: any) {
+    res.json = function (data: Record<string, unknown>) {
       res.jsonData = data;
       return res;
     };
@@ -49,7 +58,7 @@ describe("Validation Middleware - Unit Tests", () => {
       validateBody(schema)(req as Request, res as Response, next);
 
       expect(nextCalled).toBe(true);
-      expect((req as any).validatedBody).toEqual({ name: "John", age: 30 });
+      expect((req as MockRequest).validatedBody).toEqual({ name: "John", age: 30 });
     });
 
     it("should reject invalid data and return 400 error", () => {
@@ -64,10 +73,10 @@ describe("Validation Middleware - Unit Tests", () => {
 
       validateBody(schema)(req as Request, res as Response, next);
 
-      expect((res as any).statusCode).toBe(400);
-      expect((res as any).jsonData.success).toBe(false);
-      expect((res as any).jsonData.details).toBeDefined();
-      expect(Array.isArray((res as any).jsonData.details)).toBe(true);
+      expect((res as MockResponse).statusCode).toBe(400);
+      expect((res as MockResponse).jsonData?.success).toBe(false);
+      expect((res as MockResponse).jsonData?.details).toBeDefined();
+      expect(Array.isArray((res as MockResponse).jsonData?.details)).toBe(true);
     });
 
     it("should include field names in validation errors", () => {
@@ -82,9 +91,9 @@ describe("Validation Middleware - Unit Tests", () => {
 
       validateBody(schema)(req as Request, res as Response, next);
 
-      const errors = (res as any).jsonData.details;
-      expect(errors.some((e: any) => e.field === "username")).toBe(true);
-      expect(errors.some((e: any) => e.field === "password")).toBe(true);
+      const errors = (res as MockResponse).jsonData?.details as unknown[];
+      expect(errors.some((e: unknown) => (e as Record<string, unknown>).field === "username")).toBe(true);
+      expect(errors.some((e: unknown) => (e as Record<string, unknown>).field === "password")).toBe(true);
     });
   });
 
@@ -117,9 +126,9 @@ describe("Validation Middleware - Unit Tests", () => {
 
       validateParams(schema)(req as Request, res as Response, next);
 
-      expect((res as any).statusCode).toBe(400);
-      expect((res as any).jsonData.success).toBe(false);
-      expect((res as any).jsonData.error).toContain("Parameter validation failed");
+      expect((res as MockResponse).statusCode).toBe(400);
+      expect((res as MockResponse).jsonData?.success).toBe(false);
+      expect((res as MockResponse).jsonData?.error).toContain("Parameter validation failed");
     });
   });
 
@@ -153,9 +162,9 @@ describe("Validation Middleware - Unit Tests", () => {
 
       validateQuery(schema)(req as Request, res as Response, next);
 
-      expect((res as any).statusCode).toBe(400);
-      expect((res as any).jsonData.success).toBe(false);
-      expect((res as any).jsonData.error).toContain("Query validation failed");
+      expect((res as MockResponse).statusCode).toBe(400);
+      expect((res as MockResponse).jsonData?.success).toBe(false);
+      expect((res as MockResponse).jsonData?.error).toContain("Query validation failed");
     });
   });
 });

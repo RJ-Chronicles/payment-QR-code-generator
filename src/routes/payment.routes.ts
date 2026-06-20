@@ -13,6 +13,7 @@ import {
   ConfirmPaymentResponseSchema,
   GetCustomerSummaryResponseSchema,
 } from "../schemas/payment.schemas";
+import { CreateQRRequest, ConfirmPaymentRequest } from "../types/payment.types";
 import {
   validateBody,
   validateParams,
@@ -30,7 +31,7 @@ export const paymentRouter = Router();
  */
 paymentRouter.post("/qr", validateBody(CreateQRRequestSchema), async (req: Request, res: Response) => {
   try {
-    const body = (req as any).validatedBody;
+    const body = (req as unknown as Record<string, unknown>).validatedBody as CreateQRRequest;
     const record = await createPaymentQR(body);
 
     // Validate response shape with Zod
@@ -104,7 +105,7 @@ paymentRouter.patch(
   validateBody(ConfirmPaymentRequestSchema),
   async (req: Request, res: Response) => {
     try {
-      const { transactionId, status } = (req as any).validatedBody;
+      const { transactionId, status } = (req as unknown as Record<string, unknown>).validatedBody as ConfirmPaymentRequest;
       const updated = await confirmPayment(
         req.params.qrId,
         transactionId,
